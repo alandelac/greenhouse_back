@@ -1,63 +1,52 @@
+const { initializeApp } =require ("firebase/app");
+const { getDatabase, ref, onValue, child, get } =require ("firebase/database");
+
+// TODO: Replace the following with your app's Firebase project configuration
+// See: https://firebase.google.com/docs/web/learn-more#config-object
+const firebaseConfig = {
+  apiKey: "AIzaSyATF3Ey9JHnMC3EYlAy4jcHtSY_9F7kvPU",
+  authDomain: "greenmayas-48771.firebaseapp.com",
+  databaseURL: "https://greenmayas-48771-default-rtdb.firebaseio.com",
+  projectId: "greenmayas-48771",
+  storageBucket: "greenmayas-48771.appspot.com",
+  messagingSenderId: "774450277707",
+  appId: "1:774450277707:web:c42dac297cc9f96de5ccce",
+  measurementId: "G-X0XKN74T3T"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
+// Initialize Realtime Database and get a reference to the service
+const database = getDatabase(app);
+
+const dbRef = ref(getDatabase());
+get(child(dbRef, `actuators`)).then((snapshot) => {
+  if (snapshot.exists()) {
+    console.log(snapshot.val());
+  } else {
+    console.log("No data available");
+  }
+}).catch((error) => {
+  console.error(error);
+});
+
 const express = require("express");
-const app = express();
+const expressApp = express();
 const port = 3000;
 
-const mysql = require("mysql");
-const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
-  database: "greenhouse",
+
+
+expressApp.get("/humidity", (req, res) => {
+  res.send("Hola Mundo");
 });
 
-connection.connect();
-
-app.get("/humidity", (req, res) => {
-  connection.query("call get_humidity()", (err, rows, fields) => {
-    if (err) throw err;
-
-    for (let i = 0; i < rows[0].length; i++) {
-      const fechaHora = new Date(rows[0][i].time);
-      const hora = fechaHora.getHours();
-      rows[0][i].time = hora;
-    }
-
-    res.send(rows[0]);
-  });
-});
-
-app.get("/temperature", (req, res) => {
-  connection.query("call get_temperature()", (err, rows, fields) => {
-    if (err) throw err;
-
-    for (let i = 0; i < rows[0].length; i++) {
-      const fechaHora = new Date(rows[0][i].time);
-      const hora = fechaHora.getHours();
-      rows[0][i].time = hora;
-    }
-
-    res.send(rows[0]);
-  });
-});
-
-app.get("/light", (req, res) => {
-  connection.query("call get_light()", (err, rows, fields) => {
-    if (err) throw err;
-
-    for (let i = 0; i < rows[0].length; i++) {
-      const fechaHora = new Date(rows[0][i].time);
-      const hora = fechaHora.getHours();
-      rows[0][i].time = hora;
-    }
-
-    res.send(rows[0]);
-  });
-});
 
 process.on("exit", () => {
   connection.end();
 });
 
-app.listen(port, () => {
+expressApp.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
