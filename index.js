@@ -1,13 +1,6 @@
 // modulos de firebase
 const { initializeApp } = require("firebase/app");
-const {
-  getDatabase,
-  ref,
-  onValue,
-  child,
-  get,
-  set,
-} = require("firebase/database");
+const { getDatabase, ref, child, get, set } = require("firebase/database");
 
 // cosas para que funcione firebase
 const firebaseConfig = {
@@ -48,14 +41,28 @@ expressApp.post("/addData", (req, res) => {
           if (data[i].name == vegetable) {
             index = i;
             timeIndex = data[index].timestamp.length;
-          }          
+          }
         }
 
         // conseguir la fecha de hoy
-        const d_t = new Date();
-        let year = d_t.getFullYear();
-        let month = d_t.getMonth();
-        let day = d_t.getDate();
+        const year = d_t.getFullYear();
+        const month = d_t.getMonth() + 1;
+        const day = d_t.getDate();
+        const hour = d_t.getHours();
+        const minute = d_t.getMinutes();
+        const second = d_t.getSeconds();
+        const fecha =
+          day +
+          "/" +
+          month +
+          "/" +
+          year +
+          " " +
+          hour +
+          ":" +
+          minute +
+          ":" +
+          second;
 
         // agregar el dato a la tabla de timestamp de la BD
         /* Json debe de estar como lo siguiente:
@@ -66,7 +73,7 @@ expressApp.post("/addData", (req, res) => {
           "light": true
         }*/
         set(ref(db, "planta/" + (index + 1) + "/timestamp/" + timeIndex), {
-          date: day + "/" + (month+1) + "/" + year,
+          date: fecha,
           humidity: req.body.humidity,
           light: req.body.light,
           temperature: req.body.temperature,
@@ -81,7 +88,6 @@ expressApp.post("/addData", (req, res) => {
       console.error(error);
     });
 
-  res.send("Timestamp agregado");
   res.status(200);
 });
 
@@ -114,9 +120,7 @@ expressApp.get("/getActuator", (req, res) => {
 expressApp.get("/getPlantData", (req, res) => {
   const dbRef = ref(getDatabase());
   let vegetable = req.query.name;
-  let metrics = req.query.metrics;
   let index = -1; // index del vegetal
-  let timeIndex = -1; // index del timestamp
   const db = getDatabase();
 
   get(child(dbRef, `planta`))
@@ -134,7 +138,7 @@ expressApp.get("/getPlantData", (req, res) => {
         }
         let sendingData = data[index].timestamp;
         sendingData = sendingData.slice(-24);
-        
+
         res.status(200);
         res.send(sendingData);
       } else {
@@ -146,6 +150,75 @@ expressApp.get("/getPlantData", (req, res) => {
     });
 
   res.status(200);
+});
+
+// agregar una planta nueva (iniciar primeros 24 timestamp en 0s)
+expressApp.post("/addPlant", (req, res) => {
+  const dbRef = ref(getDatabase());
+  const plant = req.body.name;
+  const newHumidity = req.body.humidity;
+  const newTemperature = req.body.temperature;
+  const light = req.body.light;
+
+  let index = -1; // index del vegetal
+
+  const db = getDatabase();
+
+  get(child(dbRef, `planta`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        let data = snapshot.val();
+        data.shift();
+        // checar que el indice de la verdura seleccionada
+        index = data.length + 1;
+
+        // conseguir la fecha de hoy
+        const d_t = new Date();
+        const year = d_t.getFullYear();
+        const month = d_t.getMonth() + 1;
+        const day = d_t.getDate();
+        const hour = d_t.getHours();
+        const minute = d_t.getMinutes();
+        const second = d_t.getSeconds();
+        const fecha =
+          day +
+          "/" +
+          month +
+          "/" +
+          year +
+          " " +
+          hour +
+          ":" +
+          minute +
+          ":" +
+          second;
+
+        set(ref(db, "planta/" + index), {
+          name: plant,
+          light_time: light,
+          humidity: newHumidity,
+          temperature: newTemperature,
+        });
+
+        for (let i = 1; i <= 25; i++) {
+          set(ref(db, "planta/" + index + "/timestamp/" + i), {
+            date: fecha,
+            humidity: 0,
+            light: false,
+            temperature: 0,
+          });
+        }
+
+        res.send("Plant Added");
+        res.status(200);
+      } else {
+        console.log("No data available");
+        res.status(400);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 });
 
 process.on("exit", () => {
