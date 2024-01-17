@@ -137,24 +137,28 @@ expressApp.get("/getPlantData", (req, res) => {
           if (data[i].name == vegetable) {
             index = i;
           }
-          //  data[index].timestamp.shift();
-
-          console.log("algo");
         }
-        let sendingData = data[index].timestamp;
-        sendingData = sendingData.slice(-24);
 
-        res.status(200);
-        res.send(sendingData);
+        if(index != -1){
+          let sendingData = data[index].timestamp;
+          sendingData = sendingData.slice(-24);
+  
+          res.status(200);
+          res.send(sendingData);
+        }
+        else{
+          send.status(400);
+        }
+        
       } else {
         console.log("No data available");
+        send.status(400);
       }
     })
     .catch((error) => {
       console.error(error);
     });
 
-  res.status(200);
 });
 
 // agregar una planta nueva (iniciar primeros 24 timestamp en 0s)
