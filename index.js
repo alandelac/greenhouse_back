@@ -73,20 +73,19 @@ expressApp.post("/addData", (req, res) => {
           "temperature": 18,
           "light": true
         }*/
-        if(index != -1){
+        if (index != -1) {
+          
           set(ref(db, "planta/" + (index + 1) + "/timestamp/" + timeIndex), {
             date: fecha,
             humidity: req.body.humidity,
             light: req.body.light,
             temperature: req.body.temperature,
           });
-          res.status(200);
-        }
-        else{
+          res.send(vegetable + " data added");
+        } else {
           res.status(400);
-          res.send(vegetable+" don't exist");
+          res.send(vegetable + " don't exist");
         }
-        
       } else {
         console.log("No data available");
         res.status(404);
@@ -95,8 +94,6 @@ expressApp.post("/addData", (req, res) => {
     .catch((error) => {
       console.error(error);
     });
-
-  res.status(200);
 });
 
 // obtener la info de los actuadores
