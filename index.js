@@ -147,12 +147,14 @@ expressApp.get("/getPlantData", (req, res) => {
           res.send(sendingData);
         }
         else{
-          send.status(400);
+          res.status(400);
+          res.send("plant dont exist");
         }
         
       } else {
         console.log("No data available");
-        send.status(400);
+        res.status(400);
+        res.send("plant dont exist");
       }
     })
     .catch((error) => {
