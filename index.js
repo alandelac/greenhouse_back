@@ -45,6 +45,7 @@ expressApp.post("/addData", (req, res) => {
         }
 
         // conseguir la fecha de hoy
+        const d_t = new Date();
         const year = d_t.getFullYear();
         const month = d_t.getMonth() + 1;
         const day = d_t.getDate();
@@ -72,13 +73,20 @@ expressApp.post("/addData", (req, res) => {
           "temperature": 18,
           "light": true
         }*/
-        set(ref(db, "planta/" + (index + 1) + "/timestamp/" + timeIndex), {
-          date: fecha,
-          humidity: req.body.humidity,
-          light: req.body.light,
-          temperature: req.body.temperature,
-        });
-        res.status(200);
+        if(index != -1){
+          set(ref(db, "planta/" + (index + 1) + "/timestamp/" + timeIndex), {
+            date: fecha,
+            humidity: req.body.humidity,
+            light: req.body.light,
+            temperature: req.body.temperature,
+          });
+          res.status(200);
+        }
+        else{
+          res.status(400);
+          res.send(vegetable+" don't exist");
+        }
+        
       } else {
         console.log("No data available");
         res.status(404);
