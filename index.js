@@ -34,10 +34,13 @@ expressApp.post("/addData", (req, res) => {
   get(child(dbRef, `planta`))
     .then((snapshot) => {
       if (snapshot.exists()) {
-        let data = snapshot.val();
-        data.shift();
+        var data = snapshot.val();
+        //let arr = Array.from(data).shift();
+        //arr.shift();
+        //console.log(typeof data);
+       // data.shift();
         // checar que el indice de la verdura seleccionada
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 1; i < data.length; i++) {
           if (data[i].name == vegetable) {
             index = i;
             timeIndex = data[index].timestamp.length;
@@ -75,7 +78,7 @@ expressApp.post("/addData", (req, res) => {
         }*/
         if (index != -1) {
           
-          set(ref(db, "planta/" + (index + 1) + "/timestamp/" + timeIndex), {
+          set(ref(db, "planta/" + (index) + "/timestamp/" + timeIndex), {
             date: fecha,
             humidity: req.body.humidity,
             light: req.body.light,
